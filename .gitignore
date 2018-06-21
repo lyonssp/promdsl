@@ -1,0 +1,8 @@
+.DS_Store
+target
+
+# IDEA
+.idea
+
+# Code Coverage Reports
+test/cover
