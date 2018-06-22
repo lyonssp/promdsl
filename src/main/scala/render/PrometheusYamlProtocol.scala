@@ -3,7 +3,10 @@ package render
 import dsl._
 import net.jcazevedo.moultingyaml._
 
+import scala.concurrent.duration.Duration
+
 object PrometheusYamlProtocol extends DefaultYamlProtocol {
+  implicit def durationString(d: Duration): String = s"${d.toSeconds}s"
 
   implicit object Ec2SdConfigYamlFormat extends YamlFormat[Ec2SdConfig] {
     override def write(obj: Ec2SdConfig): YamlValue =
@@ -11,7 +14,7 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
         YamlString("region") -> YamlString(obj.region),
         YamlString("access_key") -> YamlString(obj.accessKey),
         YamlString("secret_key") -> YamlString(obj.secretKey),
-        YamlString("refresh_interval") -> YamlString(obj.refreshInterval.toString),
+        YamlString("refresh_interval") -> YamlString(obj.refreshInterval),
         YamlString("port") -> YamlNumber(obj.port)
       )
 
@@ -56,10 +59,28 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
 
   implicit object ScrapeConfigsFormat extends YamlFormat[ScrapeConfigs] with NullOptions {
     override def write(obj: ScrapeConfigs): YamlValue = YamlObject(
-      YamlString("scrape_configs") -> YamlArray(obj.scrapeConfigs.map(config => config.toYaml): _*)
+      YamlString("scrape_configs") -> YamlArray(obj.list.map(config => config.toYaml): _*)
     )
 
     override def read(yaml: YamlValue): ScrapeConfigs = ???
   }
 
+  implicit object GlobalConfigsFormat extends YamlFormat[GlobalConfiguration] with NullOptions {
+    override def write(obj: GlobalConfiguration): YamlValue = YamlObject(
+      YamlString("scrape_interval") -> YamlString(obj.scrapeInterval),
+      YamlString("scrape_timeout") -> YamlString(obj.scrapeInterval),
+      YamlString("evaluation_interval") -> YamlString(obj.scrapeInterval)
+    )
+
+    override def read(yaml: YamlValue): GlobalConfiguration = ???
+  }
+
+  implicit object PrometheusConfigsFormat extends YamlFormat[PrometheusConfiguration] with NullOptions {
+    override def write(obj: PrometheusConfiguration): YamlValue = YamlObject(
+      YamlString("global") -> obj.globalConfiguration.toYaml,
+      YamlString("scrape_configs") -> YamlArray(obj.scrapeConfigs.list.map(config => config.toYaml): _*)
+    )
+
+    override def read(yaml: YamlValue): PrometheusConfiguration = ???
+  }
 }

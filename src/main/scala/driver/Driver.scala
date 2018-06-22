@@ -1,8 +1,8 @@
 package driver
 
-import dsl.JobDecorators.relabel
 import dsl.Ec2MetaLabels._
 import dsl.Ec2SdConfigBuilder.ec2
+import dsl.JobDecorators.relabel
 import dsl._
 import net.jcazevedo.moultingyaml._
 import render.PrometheusYamlProtocol._
@@ -11,8 +11,16 @@ import scala.concurrent.duration._
 
 object Driver {
   def main(args: Array[String]): Unit = {
-    val config =
-      ScrapeDefinition :=
+    val global =
+      GlobalConfiguration(
+        scrapeInterval = 30 seconds,
+        scrapeTimeout = 30 seconds,
+        ruleEvaluationInterval = 30 seconds,
+        external_labels = None
+      )
+
+    val scrapes =
+      ScrapeJobs :=
         relabel(
           ScrapeConfig named "ops-node-exporter" scrapes {
             ec2 inRegion "us-east-1" fromPort 80 every (30 seconds) withCredentials("access", "secret")
@@ -21,7 +29,11 @@ object Driver {
           __meta_ec2_instance_id --> "id"
         )
 
-    val yaml = config.toYaml
+    val prometheus = PrometheusConfiguration(
+      global,
+      scrapes
+    )
+    val yaml = prometheus.toYaml
     println(yaml.prettyPrint)
   }
 }
