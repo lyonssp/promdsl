@@ -15,7 +15,7 @@ class RelabelConfigFormatTest extends FlatSpec {
     val regexField: Option[YamlValue] = fields.get(YamlString("regex"))
     assert(regexField.isDefined)
     regexField.get match {
-      case YamlString(raw: String) => assert(raw == config.matching)
+      case YamlString(raw: String) => assert(raw == config.regex.get)
       case _ => fail()
     }
 

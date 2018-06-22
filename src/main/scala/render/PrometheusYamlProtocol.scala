@@ -21,20 +21,24 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit val staticConfigFormat = yamlFormat1(StaticConfig)
 
   implicit object RelabelConfigFormat extends YamlFormat[RelabelConfig] {
-    override def write(obj: RelabelConfig): YamlValue =
-      YamlObject(
+    override def write(obj: RelabelConfig): YamlValue = {
+      val required = YamlObject(
         YamlString("action") -> YamlString(obj.action.name),
-        YamlString("regex") -> YamlString(obj.matching),
         YamlString("source_labels") -> YamlArray(obj.sourceLabels.ls.map(label => YamlString(label.s)): _*),
         YamlString("target_label") -> YamlString(obj.targetLabel.s)
       )
+      obj.regex match {
+        case None => required
+        case Some(r) => required.copy(fields = required.fields.updated(YamlString("regex"), YamlString(r)))
+      }
+    }
 
     override def read(yaml: YamlValue): RelabelConfig = ???
   }
 
   implicit object RelabelConfigsFormat extends YamlFormat[RelabelConfigs] {
     override def write(obj: RelabelConfigs): YamlValue =
-      YamlArray(obj.relabelConfigs.map(conf => conf.toYaml): _*)
+      YamlArray(obj.list.map(conf => conf.toYaml): _*)
 
     override def read(yaml: YamlValue): RelabelConfigs = ???
   }
@@ -57,4 +61,5 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
 
     override def read(yaml: YamlValue): ScrapeConfigs = ???
   }
+
 }

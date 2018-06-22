@@ -1,7 +1,7 @@
 package dsl
 
-abstract class RelabelConfig {
-  def matching: String
+abstract class RelabelConfig(val regex: Option[String]) {
+  def =~(r: String): RelabelConfig
 
   def action: RelabelAction
 
@@ -10,20 +10,20 @@ abstract class RelabelConfig {
   def targetLabel: Label
 }
 
-case class KeepConfig(regex: Option[String], sourceLabels: Labels, targetLabel: Label) extends RelabelConfig {
+case class KeepConfig(override val regex: Option[String], sourceLabels: Labels, targetLabel: Label) extends RelabelConfig(regex) {
   def action: RelabelAction = keep
 
-  override def matching: String = regex.getOrElse(".*")
+  override def =~(r: String): RelabelConfig = copy(regex = Some(r))
 }
 
-case class DropConfig(regex: Option[String], sourceLabels: Labels, targetLabel: Label) extends RelabelConfig {
+case class DropConfig(override val regex: Option[String], sourceLabels: Labels, targetLabel: Label) extends RelabelConfig(regex) {
   def action: RelabelAction = drop
 
-  override def matching: String = regex.getOrElse(".*")
+  override def =~(r: String): RelabelConfig = copy(regex = Some(r))
 }
 
-case class ReplaceConfig(regex: Option[String], sourceLabels: Labels, targetLabel: Label) extends RelabelConfig {
+case class ReplaceConfig(override val regex: Option[String], sourceLabels: Labels, targetLabel: Label) extends RelabelConfig(regex) {
   def action: RelabelAction = replace
 
-  override def matching: String = regex.getOrElse(".*")
+  override def =~(r: String): RelabelConfig = copy(regex = Some(r))
 }
