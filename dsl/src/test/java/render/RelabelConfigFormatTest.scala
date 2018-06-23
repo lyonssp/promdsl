@@ -7,7 +7,7 @@ import render.PrometheusYamlProtocol.RelabelConfigFormat
 
 class RelabelConfigFormatTest extends FlatSpec {
   "The protocol for rendering RelabelConfigs" should "produce the correct yaml" in {
-    val config = ReplaceConfig(Some(".*"), Labels(Array(Label("foo"))), Label("bar"))
+    val config = ReplaceConfig(Some(".*"), Labels(Label("foo")), Label("bar"))
 
     val yaml = RelabelConfigFormat.write(config)
     val fields = yaml.asYamlObject.fields
