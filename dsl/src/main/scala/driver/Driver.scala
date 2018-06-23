@@ -1,5 +1,6 @@
 package driver
 
+import aws.AwsCredentials
 import dsl.Ec2MetaLabels._
 import dsl.Ec2SdConfigBuilder.ec2
 import dsl.JobDecorators.relabel
@@ -23,7 +24,7 @@ object Driver {
       ScrapeJobs :=
         relabel(
           ScrapeConfig named "ops-node-exporter" scrapes {
-            ec2 inRegion "us-east-1" fromPort 80 every (30 seconds) withCredentials("access", "secret")
+            ec2 inRegion "us-east-1" fromPort 80 every (30 seconds) withCredentials AwsCredentials("access", "secret")
           },
           __meta_ec2_availability_zone --> "az" =~ "us-east-1",
           __meta_ec2_instance_id --> "id"
@@ -33,6 +34,7 @@ object Driver {
       global,
       scrapes
     )
+
     val yaml = prometheus.toYaml
     println(yaml.prettyPrint)
   }

@@ -1,12 +1,8 @@
-name := "MyProject"
+organization := "com.github.lyonssp"
+name := "promdsl"
+version := "0.0.1-SNAPSHOT"
+scalaVersion := "2.12.4"
 
-version := "1.0"
-
-scalaVersion := "2.12.1"
-
-resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
-
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
-libraryDependencies += "net.jcazevedo" %% "moultingyaml" % "0.4.0"
-
+lazy val dsl = project
+  .settings(Common.settings: _*)
+  .settings(libraryDependencies ++= Dependencies.dslDependencies)

@@ -1,5 +1,7 @@
 package dsl
 
+import aws.AwsCredentials
+
 import scala.concurrent.duration._
 
 object Ec2SdConfigBuilder {
@@ -11,7 +13,7 @@ case class Ec2SdConfigBuilder(region: Option[String], accessKey: Option[String],
 
   def fromPort(port: Int): Ec2SdConfigBuilder = copy(port = Some(port))
 
-  def withCredentials(accessKey: String, secretKey: String): Ec2SdConfigBuilder = copy(accessKey = Some(accessKey), secretKey = Some(secretKey))
+  def withCredentials(ac: AwsCredentials): Ec2SdConfigBuilder = copy(accessKey = Some(ac.accessKey), secretKey = Some(ac.secretKey))
 
   def every(d: Duration): Ec2SdConfigBuilder = copy(refreshInterval = Some(d))
 
