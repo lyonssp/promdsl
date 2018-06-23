@@ -21,7 +21,18 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
     override def read(yaml: YamlValue): Ec2SdConfig = ???
   }
 
-  implicit val staticConfigFormat = yamlFormat1(StaticConfig)
+  implicit object StaticConfigFormat extends YamlFormat[StaticConfig] {
+    override def write(obj: StaticConfig): YamlValue = prune(YamlObject(
+      YamlString("targets") -> obj.targets.toYaml,
+      YamlString("labels") -> {
+        if (obj.lmap.isEmpty)
+          YamlNull
+        else
+          obj.lmap.toYaml
+      }))
+
+    override def read(yaml: YamlValue): StaticConfig = ???
+  }
 
   implicit object RelabelConfigFormat extends YamlFormat[RelabelConfig] {
     override def write(obj: RelabelConfig): YamlValue = YamlObject(

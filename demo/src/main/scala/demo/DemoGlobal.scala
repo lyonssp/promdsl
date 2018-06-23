@@ -1,7 +1,6 @@
 package demo
 
-import aws.AwsCredentials
-import dsl.Ec2SdConfigBuilder.ec2
+import dsl.StaticConfigBuilder.targets
 import dsl._
 import render.dumper.dump
 
@@ -33,7 +32,13 @@ object DemoGlobal {
         )),
         ScrapeJobs :=
           job named "ec2-sd-demo" scrapes {
-            ec2 inRegion "us-east-1" fromPort 80 every (30 seconds) withCredentials AwsCredentials("access", "secret")
+            targets(
+              "foo.com",
+              "bar.com"
+            ) labeled(
+              "foo" -> "bar",
+              "baz" -> "qux"
+            )
           }
       )
     })
