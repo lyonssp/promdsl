@@ -6,3 +6,7 @@ scalaVersion := "2.12.4"
 lazy val dsl = project
   .settings(Common.settings: _*)
   .settings(libraryDependencies ++= Dependencies.dslDependencies)
+
+lazy val demo = project
+  .dependsOn(dsl)
+  .settings(Common.settings: _*)

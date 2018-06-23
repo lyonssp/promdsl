@@ -24,17 +24,11 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit val staticConfigFormat = yamlFormat1(StaticConfig)
 
   implicit object RelabelConfigFormat extends YamlFormat[RelabelConfig] {
-    override def write(obj: RelabelConfig): YamlValue = {
-      val required = YamlObject(
-        YamlString("action") -> YamlString(obj.action.name),
-        YamlString("source_labels") -> YamlArray(obj.sourceLabels.ls.map(label => YamlString(label.s)): _*),
-        YamlString("target_label") -> YamlString(obj.targetLabel.s)
-      )
-      obj.regex match {
-        case None => required
-        case Some(r) => required.copy(fields = required.fields.updated(YamlString("regex"), YamlString(r)))
-      }
-    }
+    override def write(obj: RelabelConfig): YamlValue = YamlObject(
+      YamlString("action") -> YamlString(obj.action.name), YamlString("source_labels") -> YamlArray(obj.sourceLabels.ls.map(label => YamlString(label.s)): _*),
+      YamlString("target_label") -> YamlString(obj.targetLabel.s),
+      YamlString("regex") -> obj.regex.toYaml
+    )
 
     override def read(yaml: YamlValue): RelabelConfig = ???
   }
@@ -47,17 +41,17 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   }
 
 
-  implicit object ScrapeConfigFormat extends YamlFormat[ScrapeConfig] with NullOptions {
-    override def write(obj: ScrapeConfig): YamlValue = YamlObject(
-      YamlString("job_name") -> YamlString(obj.jobName),
+  implicit object ScrapeConfigFormat extends YamlFormat[job] {
+    override def write(obj: job): YamlValue = prune(YamlObject(
+      YamlString("job_name") -> YamlString(obj.name),
       YamlString("ec2_sd_config") -> obj.ec2SdConfig.toYaml,
       YamlString("relabel_config") -> obj.relabelConfig.toYaml
-    )
+    ))
 
-    override def read(yaml: YamlValue): ScrapeConfig = ???
+    override def read(yaml: YamlValue): job = ???
   }
 
-  implicit object ScrapeConfigsFormat extends YamlFormat[ScrapeConfigs] with NullOptions {
+  implicit object ScrapeConfigsFormat extends YamlFormat[ScrapeConfigs] {
     override def write(obj: ScrapeConfigs): YamlValue = YamlObject(
       YamlString("scrape_configs") -> YamlArray(obj.list.map(config => config.toYaml): _*)
     )
@@ -65,7 +59,7 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
     override def read(yaml: YamlValue): ScrapeConfigs = ???
   }
 
-  implicit object GlobalConfigsFormat extends YamlFormat[GlobalConfiguration] with NullOptions {
+  implicit object GlobalConfigsFormat extends YamlFormat[GlobalConfiguration] {
     override def write(obj: GlobalConfiguration): YamlValue = YamlObject(
       YamlString("scrape_interval") -> YamlString(obj.scrapeInterval),
       YamlString("scrape_timeout") -> YamlString(obj.scrapeInterval),
@@ -75,12 +69,20 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
     override def read(yaml: YamlValue): GlobalConfiguration = ???
   }
 
-  implicit object PrometheusConfigsFormat extends YamlFormat[PrometheusConfiguration] with NullOptions {
-    override def write(obj: PrometheusConfiguration): YamlValue = YamlObject(
+  implicit object PrometheusConfigsFormat extends YamlFormat[PrometheusConfiguration] {
+    override def write(obj: PrometheusConfiguration): YamlValue = prune(YamlObject(
       YamlString("global") -> obj.globalConfiguration.toYaml,
       YamlString("scrape_configs") -> YamlArray(obj.scrapeConfigs.list.map(config => config.toYaml): _*)
-    )
+    ))
 
     override def read(yaml: YamlValue): PrometheusConfiguration = ???
+  }
+
+  private def prune(value: YamlValue): YamlValue = value match {
+    case YamlArray(vs) => YamlArray(vs.map(prune))
+    case YamlObject(fs) => YamlObject(fs.filter({
+      case (_, v) => v != YamlNull
+    }))
+    case _ => value
   }
 }

@@ -1,3 +1,3 @@
 package dsl
 
-case class PrometheusConfiguration(globalConfiguration: GlobalConfiguration, scrapeConfigs: ScrapeConfigs)
+case class PrometheusConfiguration(globalConfiguration: Option[GlobalConfiguration], scrapeConfigs: ScrapeConfigs)

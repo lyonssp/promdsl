@@ -1,7 +1,7 @@
 package dsl
 
 object JobDecorators {
-  def relabel(sc: ScrapeConfig, rc: RelabelConfig*): ScrapeConfig = {
+  def relabel(sc: job, rc: RelabelConfig*): job = {
     sc.relabelConfig match {
       case None => sc.copy(relabelConfig = Some(RelabelConfigs(rc)))
       case Some(rcs) =>
