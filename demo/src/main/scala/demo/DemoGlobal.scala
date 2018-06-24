@@ -1,7 +1,9 @@
 package demo
 
-import dsl.StaticConfigBuilder.targets
-import dsl._
+import global.GlobalConfiguration
+import job.scrape
+import static.StaticConfigBuilder._
+import prometheus.PrometheusConfiguration
 import render.dumper.dump
 
 import scala.concurrent.duration._
@@ -30,15 +32,9 @@ object DemoGlobal {
           ruleEvaluationInterval = 30 seconds,
           external_labels = None
         )),
-        ScrapeJobs :=
+        scrape :=
           job named "ec2-sd-demo" scrapes {
-            targets(
-              "foo.com",
-              "bar.com"
-            ) labeled(
-              "foo" -> "bar",
-              "baz" -> "qux"
-            )
+            targets("foo.com", "bar.com") labeled("foo" -> "bar", "baz" -> "qux")
           }
       )
     })

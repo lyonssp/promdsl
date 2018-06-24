@@ -1,8 +1,8 @@
 package render
 
-import dsl.StaticConfig
 import net.jcazevedo.moultingyaml.YamlString
 import org.scalatest.FlatSpec
+import static.StaticConfig
 
 class PrometheusYamlProtocolTest extends FlatSpec {
   "A static config" should "exclude labels when none are given" in {

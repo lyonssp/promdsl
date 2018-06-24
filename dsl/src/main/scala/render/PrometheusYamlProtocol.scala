@@ -1,7 +1,13 @@
 package render
 
-import dsl._
+import aws.Ec2SdConfig
+import global.GlobalConfiguration
+import job.ScrapeConfig
+import job.scrape.ScrapeConfigs
+import label.{RelabelConfig, RelabelConfigs}
 import net.jcazevedo.moultingyaml._
+import prometheus.PrometheusConfiguration
+import static.StaticConfig
 
 import scala.concurrent.duration.Duration
 
@@ -52,14 +58,14 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   }
 
 
-  implicit object ScrapeConfigFormat extends YamlFormat[job] {
-    override def write(obj: job): YamlValue = prune(YamlObject(
+  implicit object ScrapeConfigFormat extends YamlFormat[ScrapeConfig] {
+    override def write(obj: ScrapeConfig): YamlValue = prune(YamlObject(
       YamlString("job_name") -> YamlString(obj.name),
       YamlString("ec2_sd_config") -> obj.ec2SdConfig.toYaml,
       YamlString("relabel_config") -> obj.relabelConfig.toYaml
     ))
 
-    override def read(yaml: YamlValue): job = ???
+    override def read(yaml: YamlValue): ScrapeConfig = ???
   }
 
   implicit object ScrapeConfigsFormat extends YamlFormat[ScrapeConfigs] {

@@ -1,8 +1,9 @@
 package demo
 
 import aws.AwsCredentials
-import dsl.Ec2SdConfigBuilder.ec2
-import dsl.{PrometheusConfiguration, job, ScrapeJobs}
+import aws.Ec2SdConfigBuilder._
+import job.scrape
+import prometheus.PrometheusConfiguration
 import render.dumper.dump
 
 import scala.concurrent.duration._
@@ -22,7 +23,7 @@ object DemoEc2 {
     println(dump {
       PrometheusConfiguration(
         None,
-        ScrapeJobs := {
+        scrape := {
           job named "ec2-sd-demo" scrapes {
             ec2 inRegion "us-east-1" fromPort 80 every (30 seconds) withCredentials AwsCredentials("access", "secret")
           }

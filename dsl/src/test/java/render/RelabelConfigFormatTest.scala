@@ -1,6 +1,6 @@
 package render
 
-import dsl.{Label, Labels, ReplaceConfig}
+import label.{Label, Labels, ReplaceConfig}
 import net.jcazevedo.moultingyaml.{YamlString, YamlValue}
 import org.scalatest.FlatSpec
 import render.PrometheusYamlProtocol.RelabelConfigFormat

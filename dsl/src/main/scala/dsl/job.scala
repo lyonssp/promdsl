@@ -1,13 +1,22 @@
-package dsl
+import aws.{Ec2SdConfig, Ec2SdConfigBuilder}
+import label.RelabelConfigs
+import static.{StaticConfig, StaticConfigBuilder}
 
-object job {
-  def named(name: String): job = job(name, None, None, None)
+package object job {
+  def named(name: String): ScrapeConfig = ScrapeConfig(name, None, None, None)
+
+  case class ScrapeConfig(name: String, staticConfig: Option[StaticConfig], ec2SdConfig: Option[Ec2SdConfig], relabelConfig: Option[RelabelConfigs]) {
+    def scrapes(ec2SdConfigBuilder: => Ec2SdConfigBuilder): ScrapeConfig = copy(ec2SdConfig = Some(ec2SdConfigBuilder.build))
+
+    def scrapes(staticConfigBuilder: StaticConfigBuilder): ScrapeConfig = copy(staticConfig = Some(staticConfigBuilder.build))
+  }
+
+  object scrape {
+    def :=(sc: ScrapeConfig*): ScrapeConfigs = ScrapeConfigs(sc.toSeq)
+
+    case class ScrapeConfigs(list: Seq[ScrapeConfig])
+
+  }
+
 }
 
-case class job(name: String, staticConfig: Option[StaticConfig], ec2SdConfig: Option[Ec2SdConfig], relabelConfig: Option[RelabelConfigs]) {
-  def scrapes(ec2SdConfigBuilder: => Ec2SdConfigBuilder): job = copy(ec2SdConfig = Some(ec2SdConfigBuilder.build))
-
-  def scrapes(staticConfigBuilder: StaticConfigBuilder): job = copy(staticConfig = Some(staticConfigBuilder.build))
-
-  def withRelabeling(rc: RelabelConfig*): job = copy(relabelConfig = Some(RelabelConfigs(rc.toSeq)))
-}

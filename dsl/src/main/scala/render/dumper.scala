@@ -1,7 +1,7 @@
 package render
 
-import dsl.PrometheusConfiguration
 import net.jcazevedo.moultingyaml._
+import prometheus.PrometheusConfiguration
 import render.PrometheusYamlProtocol._
 
 object dumper {

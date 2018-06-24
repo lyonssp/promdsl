@@ -1,11 +1,13 @@
 package driver
 
 import aws.AwsCredentials
-import dsl.Ec2MetaLabels._
-import dsl.Ec2SdConfigBuilder.ec2
-import dsl.JobDecorators.relabel
-import dsl._
+import aws.Ec2MetaLabels._
+import aws.Ec2SdConfigBuilder.ec2
+import global.GlobalConfiguration
+import job.scrape
+import label.relabel
 import net.jcazevedo.moultingyaml._
+import prometheus.PrometheusConfiguration
 import render.PrometheusYamlProtocol._
 
 import scala.concurrent.duration._
@@ -22,7 +24,7 @@ object Driver {
       )
 
     val scrapes =
-      ScrapeJobs :=
+      scrape :=
         relabel(
           job named "ops-node-exporter" scrapes {
             ec2 inRegion "us-east-1" fromPort 80 every (30 seconds) withCredentials AwsCredentials("access", "secret")

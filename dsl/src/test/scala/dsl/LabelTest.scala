@@ -1,6 +1,7 @@
 package dsl
 
-import dsl.Ec2MetaLabels._
+import aws.Ec2MetaLabels._
+import label.{Label, replace}
 import org.scalatest._
 
 class LabelTest extends FlatSpec {
