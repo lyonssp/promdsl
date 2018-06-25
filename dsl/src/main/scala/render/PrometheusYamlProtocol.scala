@@ -10,6 +10,7 @@ import prometheus.PrometheusConfiguration
 import static.StaticConfig
 
 import scala.concurrent.duration.Duration
+import scala.language.implicitConversions
 
 object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit def durationString(d: Duration): String = s"${d.toSeconds}s"
@@ -41,11 +42,11 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object RelabelConfigFormat extends YamlFormat[RelabelConfig] {
-    override def write(obj: RelabelConfig): YamlValue = YamlObject(
+    override def write(obj: RelabelConfig): YamlValue = prune(YamlObject(
       YamlString("action") -> YamlString(obj.action.name), YamlString("source_labels") -> YamlArray(obj.sourceLabels.ls.map(label => YamlString(label.s)): _*),
       YamlString("target_label") -> YamlString(obj.targetLabel.s),
-      YamlString("regex") -> obj.regex.toYaml
-    )
+      YamlString("regex") -> obj.regex.map(r => r.toYaml).getOrElse(YamlNull)
+    ))
 
     override def read(yaml: YamlValue): RelabelConfig = ???
   }
@@ -61,8 +62,9 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit object ScrapeConfigFormat extends YamlFormat[ScrapeConfig] {
     override def write(obj: ScrapeConfig): YamlValue = prune(YamlObject(
       YamlString("job_name") -> YamlString(obj.name),
+      YamlString("static_config") -> obj.staticConfig.toYaml,
       YamlString("ec2_sd_config") -> obj.ec2SdConfig.toYaml,
-      YamlString("relabel_config") -> obj.relabelConfig.toYaml
+      YamlString("relabel_config") -> obj.relabelConfig.toYaml,
     ))
 
     override def read(yaml: YamlValue): ScrapeConfig = ???
@@ -79,8 +81,8 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit object GlobalConfigsFormat extends YamlFormat[GlobalConfiguration] {
     override def write(obj: GlobalConfiguration): YamlValue = YamlObject(
       YamlString("scrape_interval") -> YamlString(obj.scrapeInterval),
-      YamlString("scrape_timeout") -> YamlString(obj.scrapeInterval),
-      YamlString("evaluation_interval") -> YamlString(obj.scrapeInterval)
+      YamlString("scrape_timeout") -> YamlString(obj.scrapeTimeout),
+      YamlString("evaluation_interval") -> YamlString(obj.ruleEvaluationInterval)
     )
 
     override def read(yaml: YamlValue): GlobalConfiguration = ???

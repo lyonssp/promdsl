@@ -1,10 +1,15 @@
-import label.Labels
-
 import scala.concurrent.duration.Duration
 
 package object global {
 
-  case class GlobalConfiguration(scrapeInterval: Duration, scrapeTimeout: Duration, ruleEvaluationInterval: Duration, external_labels: Option[Labels])
+  trait GlobalConfiguration {
+    def scrapeInterval: Duration
+
+    def scrapeTimeout: Duration
+
+    def ruleEvaluationInterval: Duration
+
+    def externalLabels: Option[Map[String, String]]
+  }
 
 }
-
