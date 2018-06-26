@@ -1,6 +1,8 @@
+import configuration.Ec2Targets
 import label.Label
 
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 package object aws {
 
@@ -41,7 +43,7 @@ package object aws {
 
     def every(d: Duration): Ec2SdConfigBuilder = copy(refreshInterval = Some(d))
 
-    def build: Ec2SdConfig = Ec2SdConfig(
+    def build: Ec2Targets = Ec2Targets(
       region.getOrElse(""),
       accessKey.getOrElse(""),
       secretKey.getOrElse(""),

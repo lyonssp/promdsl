@@ -1,6 +1,6 @@
 package render
 
-import aws.Ec2SdConfig
+import configuration.{Ec2Targets, StaticTargets}
 import global.GlobalConfiguration
 import job.ScrapeConfig
 import job.scrape.ScrapeConfigs
@@ -8,7 +8,6 @@ import label.{RelabelConfig, RelabelConfigs}
 import net.jcazevedo.moultingyaml._
 import prometheus.PrometheusConfiguration
 import rules.RulesConfiguration
-import static.StaticConfig
 
 import scala.concurrent.duration.Duration
 import scala.language.implicitConversions
@@ -16,8 +15,8 @@ import scala.language.implicitConversions
 object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit def durationString(d: Duration): String = s"${d.toSeconds}s"
 
-  implicit object Ec2SdConfigYamlFormat extends YamlFormat[Ec2SdConfig] {
-    override def write(obj: Ec2SdConfig): YamlValue =
+  implicit object Ec2TargetsYamlFormat extends YamlFormat[Ec2Targets] {
+    override def write(obj: Ec2Targets): YamlValue =
       YamlObject(
         YamlString("region") -> YamlString(obj.region),
         YamlString("access_key") -> YamlString(obj.accessKey),
@@ -26,11 +25,11 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
         YamlString("port") -> YamlNumber(obj.port)
       )
 
-    override def read(yaml: YamlValue): Ec2SdConfig = ???
+    override def read(yaml: YamlValue): Ec2Targets = ???
   }
 
-  implicit object StaticConfigFormat extends YamlFormat[StaticConfig] {
-    override def write(obj: StaticConfig): YamlValue = prune(YamlObject(
+  implicit object StaticTargetsFormat extends YamlFormat[StaticTargets] {
+    override def write(obj: StaticTargets): YamlValue = prune(YamlObject(
       YamlString("targets") -> obj.targets.toYaml,
       YamlString("labels") -> {
         if (obj.lmap.isEmpty)
@@ -39,7 +38,7 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
           obj.lmap.toYaml
       }))
 
-    override def read(yaml: YamlValue): StaticConfig = ???
+    override def read(yaml: YamlValue): StaticTargets = ???
   }
 
   implicit object RelabelConfigFormat extends YamlFormat[RelabelConfig] {
@@ -63,8 +62,10 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   implicit object ScrapeConfigFormat extends YamlFormat[ScrapeConfig] {
     override def write(obj: ScrapeConfig): YamlValue = prune(YamlObject(
       YamlString("job_name") -> YamlString(obj.name),
-      YamlString("static_config") -> obj.staticConfig.toYaml,
-      YamlString("ec2_sd_config") -> obj.ec2SdConfig.toYaml,
+      obj.scrapeTargets match {
+        case st: StaticTargets => YamlString("static_config") -> st.toYaml
+        case ec2: Ec2Targets => YamlString("ec2_sd_config") -> ec2.toYaml
+      },
       YamlString("relabel_config") -> obj.relabelConfig.toYaml,
     ))
 

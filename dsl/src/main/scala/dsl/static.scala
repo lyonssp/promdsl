@@ -1,3 +1,5 @@
+import configuration.StaticTargets
+
 package object static {
 
   case class StaticConfig(targets: Seq[String], lmap: Map[String, String])
@@ -11,7 +13,7 @@ package object static {
       case (map, (k, v)) => map.updated(k, v)
     }))
 
-    def build: StaticConfig = StaticConfig(targets.getOrElse(Nil), lmap.getOrElse(Map.empty[String, String]))
+    def build: StaticTargets = StaticTargets(targets.getOrElse(Nil), lmap.getOrElse(Map.empty[String, String]))
   }
 
 }

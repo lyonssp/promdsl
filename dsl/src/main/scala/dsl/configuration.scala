@@ -1,21 +1,18 @@
-import global.GlobalConfiguration
-import rules.RulesConfiguration
-
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 package object configuration {
 
-  implicit object MyGlobalConfiguration extends GlobalConfiguration {
-    override val scrapeInterval: Duration = 30 seconds
-    override val scrapeTimeout: Duration = 30 seconds
-    override val ruleEvaluationInterval: Duration = 10 seconds
-    override val externalLabels: Option[Map[String, String]] = None
+  abstract class ScrapeTargets {
+    def kind: String
   }
 
-  implicit object MyRulesConfiguration extends RulesConfiguration {
-    override def files: Seq[String] = Vector(
-      "/etc/prometheus/rules/*.yml"
-    )
+  case class Ec2Targets(region: String, accessKey: String, secretKey: String, refreshInterval: Duration, port: Int) extends ScrapeTargets {
+    override def kind: String = "ec2_sd_config"
   }
+
+  case class StaticTargets(targets: Seq[String], lmap: Map[String, String]) extends ScrapeTargets {
+    override def kind: String = "static_config"
+  }
+
 }
