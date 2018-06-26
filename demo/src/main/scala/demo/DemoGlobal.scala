@@ -17,7 +17,10 @@ object DemoGlobal {
 
     override def ruleEvaluationInterval: Duration = 100 seconds
 
-    override def externalLabels: Option[Map[String, String]] = None
+    override def externalLabels: Option[Map[String, String]] = Some(Map(
+      "foo" -> "bar",
+      "baz" -> "qux"
+    ))
   }
 
   def main(args: Array[String]): Unit = {
@@ -36,11 +39,12 @@ object DemoGlobal {
           foo: bar
           baz: qux
     */
+    import dsl.defaults.NoRulesConfiguration
     println(dump {
       prometheus.configure(
         scrape :=
-          job named "ec2-sd-demo" scrapes {
-            targets("foo.com", "bar.com") labeled("foo" -> "bar", "baz" -> "qux")
+          job named "global-demo" scrapes {
+            targets("foo.com")
           })
     })
   }

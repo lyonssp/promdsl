@@ -7,6 +7,7 @@ import job.scrape.ScrapeConfigs
 import label.{RelabelConfig, RelabelConfigs}
 import net.jcazevedo.moultingyaml._
 import prometheus.PrometheusConfiguration
+import rules.RulesConfiguration
 import static.StaticConfig
 
 import scala.concurrent.duration.Duration
@@ -79,18 +80,31 @@ object PrometheusYamlProtocol extends DefaultYamlProtocol {
   }
 
   implicit object GlobalConfigsFormat extends YamlFormat[GlobalConfiguration] {
-    override def write(obj: GlobalConfiguration): YamlValue = YamlObject(
+    override def write(obj: GlobalConfiguration): YamlValue = prune(YamlObject(
       YamlString("scrape_interval") -> YamlString(obj.scrapeInterval),
       YamlString("scrape_timeout") -> YamlString(obj.scrapeTimeout),
-      YamlString("evaluation_interval") -> YamlString(obj.ruleEvaluationInterval)
-    )
+      YamlString("evaluation_interval") -> YamlString(obj.ruleEvaluationInterval),
+      YamlString("external_labels") -> obj.externalLabels.map(el => el.toYaml).getOrElse(YamlNull)
+    ))
 
     override def read(yaml: YamlValue): GlobalConfiguration = ???
+  }
+
+  implicit object RulesConfigurationFormat extends YamlFormat[RulesConfiguration] {
+    override def write(obj: RulesConfiguration): YamlValue = obj.toYaml
+
+    override def read(yaml: YamlValue): RulesConfiguration = ???
   }
 
   implicit object PrometheusConfigsFormat extends YamlFormat[PrometheusConfiguration] {
     override def write(obj: PrometheusConfiguration): YamlValue = prune(YamlObject(
       YamlString("global") -> obj.globalConfiguration.toYaml,
+      YamlString("rule_files") -> {
+        obj.rulesConfiguration.files match {
+          case Nil => YamlNull
+          case ls => ls.toYaml
+        }
+      },
       YamlString("scrape_configs") -> YamlArray(obj.scrapeConfigs.list.map(config => config.toYaml): _*)
     ))
 
